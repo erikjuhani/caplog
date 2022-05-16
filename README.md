@@ -11,14 +11,10 @@ Simple logging system for code maneuvering captains.
 
 ## Installation
 
-Currently caplog is in a stage, where it needs to be compiled/installed from source.
-
-To use caplog locally you must do the following commands:
+Installation can be done by simply using `go install`.
 
 ```
-$ git clone git@github.com:erikjuhani/caplog.git
-$ cd caplog
-$ go install
+$ go install github.com/erikjuhani/caplog@latest
 ```
 
 ## Usage
@@ -44,7 +40,29 @@ Logs are created under `$HOME/.caplog/logbook`, which is initialised as a git re
 The logs are written directly to main branch following `<hash>_<timestamp>.log` pattern. 
 After file is created it will automatically be committed to the `.caplog/logbook` repository.
 
-### Finding entries
+### Log entries
+
+Created logs are human readable—well it depends of the writer.
+
+```log
+19:20	Hello this is my first log entry!
+
+Used as an example to provide some idea of the log entry.
+
+You can write anything here and even use keywords or tags
+to provide easier content seeking capabilities.
+
+tags: example, caplog
+```
+
+### Log storage
+
+Logs are stored as files in the filesystem and ultimately the changes
+are stored inside a git repository. Each written log entry is completely reflected
+in the git commit message, which enables users to traverse the log history using
+familiar tools like `git log`.
+
+### Finding log entries
 
 The logs are human readable and can be looked or parsed with tooling designed for text files. For example with grep.
 
