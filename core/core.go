@@ -25,7 +25,7 @@ const (
 
 	// TODO: use configuration for time layouts
 	timeFormat     = "15:04"
-	timeFileFormat = "2006-01-02_15:04"
+	timeFileFormat = "2006-01-02T15:04:05"
 )
 
 func CreateLog(date time.Time, data string) Log {
@@ -55,12 +55,13 @@ func WriteLog(log Log) error {
 
 	filename := generateFilename(log)
 	filepath := fmt.Sprintf("%s/%s", path, filename)
+	formattedLog := formatLog(log)
 
-	if err := os.WriteFile(filepath, []byte(formatLog(log)), 0644); err != nil {
+	if err := os.WriteFile(filepath, []byte(formattedLog), 0644); err != nil {
 		return err
 	}
 
-	return git.CommitSingleFile(filepath, fmt.Sprintf("log: %s", filename))
+	return git.CommitSingleFile(filepath, formattedLog)
 }
 
 func openInEditor(filename string) error {

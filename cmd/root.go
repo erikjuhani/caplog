@@ -15,11 +15,11 @@ var rootCmd = &cobra.Command{
 	Long:  ``,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) == 0 {
-			capture, err := core.CaptureEditorInput()
+			input, err := core.CaptureEditorInput()
 			if err != nil {
 				return err
 			}
-			return core.WriteLog(core.CreateLog(time.Now(), string(capture)))
+			return core.WriteLog(core.CreateLog(time.Now(), string(input)))
 		}
 		return core.WriteLog(core.CreateLog(time.Now(), args[0]))
 	},
