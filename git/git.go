@@ -2,14 +2,15 @@ package git
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 )
 
 func isGitRepository(path string) bool {
-	// Check if directory exists at all
-	if _, err := os.Stat(path); os.IsNotExist(err) {
+	// Check if git directory exists
+	if _, err := os.Stat(fmt.Sprintf("%s/.git", path)); os.IsNotExist(err) {
 		return false
 	}
 
@@ -24,7 +25,7 @@ func isGitRepository(path string) bool {
 func CommitSingleFile(path string, msg string) error {
 	dirpath := filepath.Dir(path)
 	if !isGitRepository(dirpath) {
-		if err := runGitCommand("init", "-q", dirpath); err != nil {
+		if err := runGitCommand("init", "-q", "-b", "trunk", dirpath); err != nil {
 			return err
 		}
 	}

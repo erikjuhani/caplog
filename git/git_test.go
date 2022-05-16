@@ -33,7 +33,7 @@ func TestIsGitRepository(t *testing.T) {
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
 			if tt.expected != isGitRepository(tt.path) {
-				t.Fatal("did not match expected output when deciding if directory is a git repository")
+				t.Fatal("expected did not match output when deciding if directory is a git repository")
 			}
 		})
 	}
@@ -57,7 +57,7 @@ func TestCommitSingleFile(t *testing.T) {
 		t.Run("", func(t *testing.T) {
 			os.Create(tt.file)
 			if tt.expected != CommitSingleFile(tt.file, "log: entry") {
-				t.Fatal("did not match expected error output")
+				t.Fatal("expected did not match the actual error output")
 			}
 		})
 	}
