@@ -20,10 +20,6 @@ type Log struct {
 }
 
 const (
-	// TODO: use configuration for log write directory
-	writeDir = "logbook"
-
-	// TODO: use configuration for time layouts
 	timeFormat     = "15:04"
 	timeFileFormat = "2006-01-02T15:04:05"
 )
@@ -45,7 +41,7 @@ func WriteLog(log Log) error {
 		return errors.New("no data provided")
 	}
 
-	path := fmt.Sprintf("%s/%s", config.LocalRepositoryPath, writeDir)
+	path := config.Get(config.GitLocalRepositoryKey)
 
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		if err := os.Mkdir(path, os.ModePerm); err != nil {
@@ -65,8 +61,7 @@ func WriteLog(log Log) error {
 }
 
 func openInEditor(filename string) error {
-	// TODO: use configuration
-	executable, err := exec.LookPath("vi")
+	executable, err := exec.LookPath(config.Get(config.EditorKey))
 	if err != nil {
 		return err
 	}
@@ -116,5 +111,5 @@ func generateFilename(log Log) string {
 	hash := fmt.Sprintf("%x", h.Sum(nil))[0:7]
 	date := log.Date.Format(timeFileFormat)
 
-	return fmt.Sprintf("%s_%s.log", hash, date)
+	return fmt.Sprintf("%s_%s.log", date, hash)
 }

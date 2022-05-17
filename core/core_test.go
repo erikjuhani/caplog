@@ -73,11 +73,11 @@ func TestGenerateFilename(t *testing.T) {
 	}{
 		{
 			log:      Log{},
-			expected: "95c7e5c_0001-01-01T00:00:00.log",
+			expected: "0001-01-01T00:00:00_95c7e5c.log",
 		},
 		{
 			log:      Log{Date: testDate},
-			expected: "1ee35ca_2022-05-14T22:34:16.log",
+			expected: "2022-05-14T22:34:16_1ee35ca.log",
 		},
 	}
 
