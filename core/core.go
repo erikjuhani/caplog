@@ -41,7 +41,7 @@ func WriteLog(log Log) error {
 		return errors.New("no data provided")
 	}
 
-	path := config.Get(config.GitLocalRepositoryKey)
+	path := config.Config.Git.LocalRepository
 
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		if err := os.Mkdir(path, os.ModePerm); err != nil {
@@ -61,7 +61,7 @@ func WriteLog(log Log) error {
 }
 
 func openInEditor(filename string) error {
-	executable, err := exec.LookPath(config.Get(config.EditorKey))
+	executable, err := exec.LookPath(config.Config.Editor)
 	if err != nil {
 		return err
 	}
@@ -99,9 +99,9 @@ func CaptureEditorInput() ([]byte, error) {
 func formatLog(log Log) string {
 	ts := log.Date.Format(timeFormat)
 	if len(log.Data) == 1 {
-		return fmt.Sprintf("%s\t%s", ts, log.Data[0])
+		return fmt.Sprintf("%s\t%s\n", ts, log.Data[0])
 	}
-	return fmt.Sprintf("%s\t%s\n%s", ts, log.Data[0], strings.Join(log.Data[1:], "\n"))
+	return fmt.Sprintf("%s\t%s\n%s\n", ts, log.Data[0], strings.Join(log.Data[1:], "\n"))
 }
 
 func generateFilename(log Log) string {

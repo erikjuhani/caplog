@@ -44,22 +44,28 @@ Three options (last one is flat):
 
 ## Log entry structure
 
-`<day>/<month>/<year>
+```
+<day>/<month>/<year>
 
 <hours>:<minutes>   <summary>
 
                     <body>
 
                     tags: [<tag>]
-`
+```
 
 ### Example log entries
 
-`14/05/2022
+```
+14/05/2022
 
 12:27   Initialised caplog repository with dependencies
 
         tags: caplog, go 
+```
+
+```
+14/05/2022
 
 12:44   Wrote reference documentation for caplog
 
@@ -72,4 +78,4 @@ Three options (last one is flat):
         those particular logs.
 
         tags: caplog, documentation, thoughts
-`
+```

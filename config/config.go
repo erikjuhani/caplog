@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/spf13/viper"
 )
@@ -21,13 +22,18 @@ const (
 	defaultLogDir = "capbook"
 )
 
+type config struct {
+	Git struct {
+		LocalRepository string `mapstructure:"local_repository"`
+	}
+	Editor string
+}
+
+var Config = config{}
+
 func setDefaults(localPath string) {
 	viper.SetDefault(GitLocalRepositoryKey, fmt.Sprintf("%s/%s", localPath, defaultLogDir))
 	viper.SetDefault(EditorKey, "vi")
-}
-
-func Get(key ConfigKey) string {
-	return viper.GetString(key)
 }
 
 func getConfigPath() (string, error) {
@@ -63,8 +69,26 @@ func Load() error {
 
 	// Set default values for configuration options
 	setDefaults(path)
+
 	if _, ok := err.(viper.ConfigFileAlreadyExistsError); ok {
-		return viper.ReadInConfig()
+		if err := viper.ReadInConfig(); err != nil {
+			return err
+		}
+
+		if err := viper.Unmarshal(&Config); err != nil {
+			return err
+		}
+
+		// TODO: handle config decoding better
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			return fmt.Errorf("cannot find user home directory %w", err)
+		}
+
+		// Replace tilde to point to user home directory
+		Config.Git.LocalRepository = strings.Replace(Config.Git.LocalRepository, "~", homeDir, 1)
+
+		return nil
 	}
 
 	return err
