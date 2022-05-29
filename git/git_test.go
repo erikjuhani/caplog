@@ -1,6 +1,7 @@
 package git
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"testing"
@@ -48,6 +49,14 @@ func TestCommitSingleFile(t *testing.T) {
 		expected error
 	}{
 		{
+			file:     "",
+			expected: errors.New("exit status 128"),
+		},
+		{
+			file:     dir,
+			expected: errors.New("exit status 1"),
+		},
+		{
 			file:     fmt.Sprintf("%s/%s", dir, "12345_file.log"),
 			expected: nil,
 		},
@@ -56,7 +65,7 @@ func TestCommitSingleFile(t *testing.T) {
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
 			os.Create(tt.file)
-			if tt.expected != CommitSingleFile(tt.file, "log: entry") {
+			if errors.Is(tt.expected, CommitSingleFile(tt.file, "log: entry")) {
 				t.Fatal("expected did not match the actual error output")
 			}
 		})

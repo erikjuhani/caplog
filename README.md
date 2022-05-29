@@ -17,21 +17,19 @@ Installation can be done by simply using `go install`.
 $ go install github.com/erikjuhani/caplog@latest
 ```
 
-## Configuration
-
 ## Usage
 
 To add an entry as a log call `caplog`, which will open by default `vi` text editor.
 The message should follow git commit message conventions to provide a more clear log entry as content.
 
+```
+$ caplog
+```
+
 The default editor can be changed to any preferred editor by providing a configuration file `.caplog/config`.
 
 ```toml
 editor="nvim"
-```
-
-```
-$ caplog
 ```
 
 To add a ''quick'' entry log. Call `caplog` with one argument.
@@ -85,20 +83,20 @@ familiar tools like `git log`.
 The logs are human readable and can be looked or parsed with tooling designed for text files. For example with grep.
 
 ```
-grep -r <keyword> ~/.caplog/caplog/
+grep -r <keyword> ~/.caplog/capbook/
 ```
 
 ## TODO (in priority order):
 
-- [ ] If repository is remote tracked try `push --force-with-lease`
+- [x] If repository is remote tracked handle automatic rebase and push
 
 - [ ] Implement `-t|--tags` for adding tags to a log entry
+
+- [ ] Implement `-g|--get-dir` return capbook directory for easier use of find operations
 
 - [ ] Implement `-p|--page` to separate log entries into pages by default uses root `capbook/<page>`
 
 - [ ] Implement `-c|--config` to change configuration values `git.local_repository=~/mylogs`
-
-- [ ] Implement `-g|--get-dir` return capbook directory for easier use of find operations
 
 - [ ] Implement `-d|--dry-run` run the command dry, no filesystem or git changes
 
