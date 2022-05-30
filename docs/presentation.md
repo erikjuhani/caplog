@@ -2,13 +2,37 @@
 theme: dark
 ---
 
+# Whoami
+
+Erik Kinnunen
+
+Software man by day, byte pusher by night 
+
+[github](https://github.com/erikjuhani)
+
+---
+
 # Caplog
 
 A journaling utility tool made for terminal users
 
 Made with _Go_ (the best programming language ❤️ )
 
-## I wanted
+<br/>
+
+_Special thanks to_
+
+[Andy Davies](https://github.com/Pondidum)
+
+[Sampo Siltanen](https://github.com/ssiltanen)
+
+[Raine Virta](https://github.com/raine)
+
+[Taylor Thompson](https://github.com/jamestthompson3)
+
+---
+
+# I wanted
 
 A simple tool to store ideas, conversations and plans
 
