@@ -1,7 +1,6 @@
 package git
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"testing"
@@ -45,28 +44,29 @@ func TestCommitSingleFile(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	tests := []struct {
-		file     string
-		expected error
+		file       string
+		expectsErr bool
 	}{
 		{
-			file:     "",
-			expected: errors.New("exit status 128"),
+			file:       "",
+			expectsErr: true,
 		},
 		{
-			file:     dir,
-			expected: errors.New("exit status 1"),
+			file:       dir,
+			expectsErr: true,
 		},
 		{
-			file:     fmt.Sprintf("%s/%s", dir, "12345_file.log"),
-			expected: nil,
+			file:       fmt.Sprintf("%s/%s", dir, "12345_file.log"),
+			expectsErr: false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
 			os.Create(tt.file)
-			if errors.Is(tt.expected, CommitSingleFile(tt.file, "log: entry")) {
-				t.Fatal("expected did not match the actual error output")
+			actual := CommitSingleFile(tt.file, "log: entry")
+			if (actual != nil) != tt.expectsErr {
+				t.Fatalf("expects error %t did not match actual %v", tt.expectsErr, actual)
 			}
 		})
 	}

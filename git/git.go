@@ -8,8 +8,13 @@ import (
 	"path/filepath"
 )
 
+var (
+	ErrNoPathProvided     = errors.New("no path provided")
+	ErrExecNotFoundInPath = errors.New("executable not found in path")
+)
+
 func hasGitRemote() bool {
-	if err := runGitCommand("ls-remote", "-q"); err != nil {
+	if err := runGitCommand("ls-remote"); err != nil {
 		return false
 	}
 
@@ -31,6 +36,10 @@ func isGitRepository(path string) bool {
 }
 
 func CommitSingleFile(path string, msg string) error {
+	if len(path) == 0 {
+		return ErrNoPathProvided
+	}
+
 	dirpath := filepath.Dir(path)
 	if !isGitRepository(dirpath) {
 		if err := runGitCommand("init", "-q", "-b", "trunk", dirpath); err != nil {
@@ -73,12 +82,19 @@ func commandExists(command string) bool {
 	return false
 }
 
-func runDetachedGitCommand(args ...string) error {
-	if !commandExists("git") {
-		return errors.New("git executable not found in path")
+func execCommand(cmd string, args ...string) (*exec.Cmd, error) {
+	if !commandExists(cmd) {
+		return nil, fmt.Errorf("%s %w", cmd, ErrExecNotFoundInPath)
 	}
 
-	git := exec.Command("git", args...)
+	return exec.Command(cmd, args...), nil
+}
+
+func runDetachedGitCommand(args ...string) error {
+	git, err := execCommand("git", args...)
+	if err != nil {
+		return err
+	}
 
 	if err := git.Start(); err != nil {
 		return err
@@ -92,12 +108,10 @@ func runDetachedGitCommand(args ...string) error {
 }
 
 func runGitCommand(args ...string) error {
-	if !commandExists("git") {
-		return errors.New("git executable not found in path")
+	git, err := execCommand("git", args...)
+	if err != nil {
+		return err
 	}
-
-	git := exec.Command("git", args...)
-	git.Stderr = os.Stderr
 
 	return git.Run()
 }

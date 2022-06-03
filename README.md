@@ -14,7 +14,7 @@ Simple logging system for code maneuvering captains.
 Installation can be done by simply using `go install`.
 
 ```
-$ go install github.com/erikjuhani/caplog@latest
+go install github.com/erikjuhani/caplog@latest
 ```
 
 ## Usage
@@ -23,7 +23,7 @@ To add an entry as a log call `caplog`, which will open by default `vi` text edi
 The message should follow git commit message conventions to provide a more clear log entry as content.
 
 ```
-$ caplog
+caplog
 ```
 
 The default editor can be changed to any preferred editor by providing a configuration file `.caplog/config`.
@@ -36,7 +36,7 @@ To add a ''quick'' entry log. Call `caplog` with one argument.
 The argument will be used as the log entry.
 
 ```
-$ caplog "Some entry text"
+caplog "Some entry text"
 ```
 
 ## Log history
@@ -82,8 +82,10 @@ familiar tools like `git log`.
 
 The logs are human readable and can be looked or parsed with tooling designed for text files. For example with grep.
 
+Using grep to find certain logs with `<keyword>`. Use cat to view the actual found logs.
+
 ```
-grep -r <keyword> ~/.caplog/capbook/
+grep -lF <keyword> ~/.caplog/capbook/*.log | xargs cat
 ```
 
 ## TODO (in priority order):

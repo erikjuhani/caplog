@@ -43,7 +43,7 @@ func TestFormatLog(t *testing.T) {
 	}{
 		{
 			log:      Log{Date: testDate, Data: []string{"New log entry"}},
-			expected: "22:34\tNew log entry",
+			expected: "22:34\tNew log entry\n",
 		},
 		{
 			log: Log{Date: testDate, Data: []string{
@@ -51,7 +51,7 @@ func TestFormatLog(t *testing.T) {
 				"Content",
 				"Multiple lines."},
 			},
-			expected: "22:34\tNew log entry\nContent\nMultiple lines.",
+			expected: "22:34\tNew log entry\nContent\nMultiple lines.\n",
 		},
 	}
 
