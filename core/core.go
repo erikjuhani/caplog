@@ -24,13 +24,17 @@ const (
 	timeFileFormat = "2006-01-02T15:04:05"
 )
 
-func CreateLog(date time.Time, data string) Log {
+func CreateLog(date time.Time, data string, tags []string) Log {
 	l := Log{Date: date}
 
 	scanner := bufio.NewScanner(strings.NewReader(data))
 
 	for scanner.Scan() {
 		l.Data = append(l.Data, scanner.Text())
+	}
+
+	if len(tags) > 0 {
+		l.Data = append(l.Data, fmt.Sprintf("tags: %s", strings.Join(tags, ", ")))
 	}
 
 	return l

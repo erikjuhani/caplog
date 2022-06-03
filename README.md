@@ -71,6 +71,18 @@ to provide easier content seeking capabilities.
 tags: example, caplog
 ```
 
+#### Tagging
+
+Logs can be tagged by either writing it in the log entry or using caplog `-t` or `--tag` flag.
+
+Logs can be tagged with one or multiple tags at once, these tags will be added to the end of the log entry.
+
+```
+caplog "New entry with tags" -t tag0 -t tag1
+
+caplog "New entry with tags - comma separation" -t tag0,tag1
+```
+
 ### Log storage
 
 Logs are stored as files in the filesystem and ultimately the changes
@@ -92,7 +104,7 @@ grep -lF <keyword> ~/.caplog/capbook/*.log | xargs cat
 
 - [x] If repository is remote tracked handle automatic rebase and push
 
-- [ ] Implement `-t|--tags` for adding tags to a log entry
+- [x] Implement `-t|--tag` for adding tags to a log entry
 
 - [ ] Implement `-g|--get-dir` return capbook directory for easier use of find operations
 

@@ -12,6 +12,7 @@ func TestCreateLog(t *testing.T) {
 	tests := []struct {
 		date     time.Time
 		data     string
+		tags     []string
 		expected Log
 	}{
 		{
@@ -23,12 +24,19 @@ func TestCreateLog(t *testing.T) {
 			data:     "New log entry",
 			expected: Log{Date: testDate, Data: []string{"New log entry"}},
 		},
+		{
+			date:     testDate,
+			data:     "New log entry with tags",
+			tags:     []string{"tag0", "tag1"},
+			expected: Log{Date: testDate, Data: []string{"New log entry with tags", "tags: tag0, tag1"}},
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			if !reflect.DeepEqual(tt.expected, CreateLog(tt.date, tt.data)) {
-				t.Fatal("expected log did not deeply equal to actual log")
+			actual := CreateLog(tt.date, tt.data, tt.tags)
+			if !reflect.DeepEqual(tt.expected, actual) {
+				t.Fatalf("expected log %v did not equal to actual log %v", tt.expected, actual)
 			}
 		})
 	}

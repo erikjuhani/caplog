@@ -8,6 +8,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var tags []string
+
 var rootCmd = &cobra.Command{
 	Use:   "caplog",
 	Short: "A Journaling System",
@@ -19,13 +21,14 @@ var rootCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			return core.WriteLog(core.CreateLog(time.Now(), string(input)))
+			return core.WriteLog(core.CreateLog(time.Now(), string(input), tags))
 		}
-		return core.WriteLog(core.CreateLog(time.Now(), args[0]))
+		return core.WriteLog(core.CreateLog(time.Now(), args[0], tags))
 	},
 }
 
 func Execute() {
+	rootCmd.Flags().StringSliceVarP(&tags, "tag", "t", []string{}, "Add tags to log entry")
 	err := rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
