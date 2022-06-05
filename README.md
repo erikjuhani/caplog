@@ -94,10 +94,16 @@ familiar tools like `git log`.
 
 The logs are human readable and can be looked or parsed with tooling designed for text files. For example with grep.
 
-Using grep to find certain logs with `<keyword>`. Use cat to view the actual found logs.
+Using `grep` command to find certain logs with `<keyword>`. Use for example `cat` to view the actual found logs.
 
+```bash
+grep --exclude-dir=.git -lrF <keyword> ~/.caplog/capbook | xargs cat
 ```
-grep -lF <keyword> ~/.caplog/capbook/*.log | xargs cat
+
+With directory flag using bash
+
+```bash
+grep --exclude-dir=.git -lrF <keyword> $(caplog --get-dir) | xargs cat
 ```
 
 ## TODO (in priority order):
@@ -106,7 +112,7 @@ grep -lF <keyword> ~/.caplog/capbook/*.log | xargs cat
 
 - [x] Implement `-t|--tag` for adding tags to a log entry
 
-- [ ] Implement `-g|--get-dir` return capbook directory for easier use of find operations
+- [x] Implement `-g|--get-dir` return capbook directory for easier use of find operations
 
 - [ ] Implement `-p|--page` to separate log entries into pages by default uses root `capbook/<page>`
 
