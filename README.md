@@ -61,6 +61,10 @@ The writer has all the freedom of composing the message.
 
 ```log
 // 2022-05-16T19:20:17_49b13c5.log
+---
+date: Monday, May 16, 2022
+---
+
 19:20	Hello this is my first log entry!
 
 Used as an example to provide some idea of the log entry.
@@ -81,6 +85,16 @@ Logs can be tagged with one or multiple tags at once, these tags will be added t
 caplog "New entry with tags" -t tag0 -t tag1
 
 caplog "New entry with tags - comma separation" -t tag0,tag1
+```
+
+### Pages
+
+Logs can be grouped under sub-directories or what I like to call _pages_.
+
+To write log entry under a page you need to provide a `--page` flag with the name of the sub-directory.
+
+```
+caplog "New entry in to different page" -p subpage
 ```
 
 ### Log storage
@@ -114,7 +128,7 @@ grep --exclude-dir=.git -lrF <keyword> $(caplog --get-dir) | xargs cat
 
 - [x] Implement `-g|--get-dir` return capbook directory for easier use of find operations
 
-- [ ] Implement `-p|--page` to separate log entries into pages by default uses root `capbook/<page>`
+- [x] Implement `-p|--page` to separate log entries into pages by default uses root `capbook/<page>`
 
 - [ ] Implement `-c|--config` to change configuration values `git.local_repository=~/mylogs`
 

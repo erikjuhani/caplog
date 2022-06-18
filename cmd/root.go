@@ -12,6 +12,7 @@ import (
 
 var (
 	tags   []string
+	page   string
 	getDir bool
 )
 
@@ -31,15 +32,23 @@ var rootCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			return core.WriteLog(core.CreateLog(time.Now(), string(input), tags))
+
+			meta := core.Meta{Date: time.Now(), Page: page}
+
+			return core.WriteLog(core.NewLog(meta, string(input), tags))
 		}
-		return core.WriteLog(core.CreateLog(time.Now(), args[0], tags))
+
+		meta := core.Meta{Date: time.Now(), Page: page}
+
+		return core.WriteLog(core.NewLog(meta, args[0], tags))
 	},
 }
 
 func Execute() {
 	rootCmd.Flags().StringSliceVarP(&tags, "tag", "t", []string{}, "Add tags to log entry")
+	rootCmd.Flags().StringVarP(&page, "page", "p", "", "Save log entry to sub-directory (=page)")
 	rootCmd.Flags().BoolVarP(&getDir, "get-dir", "g", false, "Returns the local repository directory")
+
 	err := rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)

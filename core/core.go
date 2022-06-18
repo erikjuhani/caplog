@@ -14,18 +14,55 @@ import (
 	"github.com/erikjuhani/caplog/git"
 )
 
-type Log struct {
+type Meta struct {
 	Date time.Time
+	Page string
+}
+
+func (m Meta) Location() string {
+	loc := config.Config.Git.LocalRepository
+
+	if len(m.Page) == 0 {
+		return loc
+	}
+
+	return fmt.Sprintf("%s/%s", loc, m.Page)
+}
+
+func (m Meta) String() string {
+	// TODO: Refactor
+	if len(m.Page) == 0 {
+		return fmt.Sprintf(`
+---
+date: %s
+---
+`, m.Date.Format(metaTimeLayout))
+	}
+
+	return fmt.Sprintf(`
+---
+date: %s
+
+page: %s
+---
+`, m.Date.Format(metaTimeLayout), m.Page)
+}
+
+type Log struct {
+	Meta
 	Data []string
 }
 
 const (
+	// TODO: Custom time layout
+	// WEEKDAY, MONTH DAY, YEAR
+	metaTimeLayout = "Monday, January 2, 2006"
 	timeFormat     = "15:04"
 	timeFileFormat = "2006-01-02T15:04:05"
 )
 
-func CreateLog(date time.Time, data string, tags []string) Log {
-	l := Log{Date: date}
+func NewLog(meta Meta, data string, tags []string) Log {
+	l := Log{Meta: meta}
 
 	scanner := bufio.NewScanner(strings.NewReader(data))
 
@@ -45,16 +82,16 @@ func WriteLog(log Log) error {
 		return errors.New("no data provided")
 	}
 
-	path := config.Config.Git.LocalRepository
+	loc := log.Location()
 
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		if err := os.Mkdir(path, os.ModePerm); err != nil {
+	if _, err := os.Stat(loc); os.IsNotExist(err) {
+		if err := os.MkdirAll(loc, os.ModePerm); err != nil {
 			return err
 		}
 	}
 
 	filename := generateFilename(log)
-	filepath := fmt.Sprintf("%s/%s", path, filename)
+	filepath := fmt.Sprintf("%s/%s", loc, filename)
 	formattedLog := formatLog(log)
 
 	if err := os.WriteFile(filepath, []byte(formattedLog), 0644); err != nil {
@@ -101,11 +138,15 @@ func CaptureEditorInput() ([]byte, error) {
 }
 
 func formatLog(log Log) string {
+	if len(log.Data) == 0 {
+		return ""
+	}
+
 	ts := log.Date.Format(timeFormat)
 	if len(log.Data) == 1 {
-		return fmt.Sprintf("%s\t%s\n", ts, log.Data[0])
+		return fmt.Sprintf("%s\n%s\t%s\n", log.Meta, ts, log.Data[0])
 	}
-	return fmt.Sprintf("%s\t%s\n%s\n", ts, log.Data[0], strings.Join(log.Data[1:], "\n"))
+	return fmt.Sprintf("%s\n%s\t%s\n%s\n", log.Meta, ts, log.Data[0], strings.Join(log.Data[1:], "\n"))
 }
 
 func generateFilename(log Log) string {
