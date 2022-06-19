@@ -28,7 +28,7 @@ func TestCreateLog(t *testing.T) {
 			meta:     Meta{Date: testDate},
 			data:     "New log entry with tags",
 			tags:     []string{"tag0", "tag1"},
-			expected: Log{Meta: Meta{Date: testDate}, Data: []string{"New log entry with tags", "tags: tag0, tag1"}},
+			expected: Log{Meta: Meta{Date: testDate}, Data: []string{"New log entry with tags", "\ntags: tag0, tag1"}},
 		},
 	}
 
@@ -55,8 +55,7 @@ func TestFormatLog(t *testing.T) {
 		},
 		{
 			log: Log{Meta: Meta{Date: testDate}, Data: []string{"New log entry"}},
-			expected: `
----
+			expected: `---
 date: Saturday, May 14, 2022
 ---
 
@@ -69,8 +68,7 @@ date: Saturday, May 14, 2022
 				"Content",
 				"Multiple lines."},
 			},
-			expected: `
----
+			expected: `---
 date: Saturday, May 14, 2022
 
 page: test
@@ -87,7 +85,7 @@ Multiple lines.
 		t.Run("", func(t *testing.T) {
 			actual := formatLog(tt.log)
 			if tt.expected != actual {
-				t.Fatalf("expected log format: %s\ndid not match actual log format: %s", tt.expected, actual)
+				t.Fatalf("expected log format:\n%s\ndid not match actual log format:\n%s", tt.expected, actual)
 			}
 		})
 	}

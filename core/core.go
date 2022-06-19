@@ -32,15 +32,13 @@ func (m Meta) Location() string {
 func (m Meta) String() string {
 	// TODO: Refactor
 	if len(m.Page) == 0 {
-		return fmt.Sprintf(`
----
+		return fmt.Sprintf(`---
 date: %s
 ---
 `, m.Date.Format(metaTimeLayout))
 	}
 
-	return fmt.Sprintf(`
----
+	return fmt.Sprintf(`---
 date: %s
 
 page: %s
@@ -71,7 +69,7 @@ func NewLog(meta Meta, data string, tags []string) Log {
 	}
 
 	if len(tags) > 0 {
-		l.Data = append(l.Data, fmt.Sprintf("tags: %s", strings.Join(tags, ", ")))
+		l.Data = append(l.Data, fmt.Sprintf("\ntags: %s", strings.Join(tags, ", ")))
 	}
 
 	return l

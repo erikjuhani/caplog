@@ -29,6 +29,25 @@ type config struct {
 	Editor string
 }
 
+func Contains(key ConfigKey) bool {
+	keys := []ConfigKey{GitLocalRepositoryKey, EditorKey}
+
+	for _, k := range keys {
+		if k == key {
+			return true
+		}
+	}
+
+	return false
+}
+
+func Write(c map[ConfigKey]string) error {
+	for k, v := range c {
+		viper.Set(k, v)
+	}
+	return viper.WriteConfig()
+}
+
 var Config = config{}
 
 func setDefaults(localPath string) {

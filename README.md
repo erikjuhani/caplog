@@ -13,7 +13,7 @@ Simple logging system for code maneuvering captains.
 
 Installation can be done by simply using `go install`.
 
-```
+```bash
 go install github.com/erikjuhani/caplog@latest
 ```
 
@@ -22,7 +22,7 @@ go install github.com/erikjuhani/caplog@latest
 To add an entry as a log call `caplog`, which will open by default `vi` text editor.
 The message should follow git commit message conventions to provide a more clear log entry as content.
 
-```
+```bash
 caplog
 ```
 
@@ -35,7 +35,7 @@ editor="nvim"
 To add a ''quick'' entry log. Call `caplog` with one argument.
 The argument will be used as the log entry.
 
-```
+```bash
 caplog "Some entry text"
 ```
 
@@ -81,7 +81,7 @@ Logs can be tagged by either writing it in the log entry or using caplog `-t` or
 
 Logs can be tagged with one or multiple tags at once, these tags will be added to the end of the log entry.
 
-```
+```bash
 caplog "New entry with tags" -t tag0 -t tag1
 
 caplog "New entry with tags - comma separation" -t tag0,tag1
@@ -93,8 +93,23 @@ Logs can be grouped under sub-directories or what I like to call _pages_.
 
 To write log entry under a page you need to provide a `--page` flag with the name of the sub-directory.
 
-```
+```bash
 caplog "New entry in to different page" -p subpage
+```
+
+### Configuration
+
+Configuration can either be adjusted by manually writing to the caplog config file or by
+using config flag option to provide configuration changes through cli.
+
+```bash
+caplog -c git.local_repository ~/mybook
+```
+
+User can also provide multiple configuration values at once.
+
+```bash
+caplog -c git.local_repository ~/mybook editor vim
 ```
 
 ### Log storage
@@ -130,7 +145,7 @@ grep --exclude-dir=.git -lrF <keyword> $(caplog --get-dir) | xargs cat
 
 - [x] Implement `-p|--page` to separate log entries into pages by default uses root `capbook/<page>`
 
-- [ ] Implement `-c|--config` to change configuration values `git.local_repository=~/mylogs`
+- [x] Implement `-c|--config` to change configuration values `git.local_repository=~/mylogs`
 
 - [ ] Implement `-d|--dry-run` run the command dry, no filesystem or git changes
 
