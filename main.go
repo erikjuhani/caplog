@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/erikjuhani/caplog/cmd"
+	"github.com/erikjuhani/caplog/cli"
 	"github.com/erikjuhani/caplog/config"
 )
 
@@ -12,5 +12,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	cmd.Execute()
+	if err := cli.Run(); err != nil {
+		log.Fatal(err)
+	}
 }

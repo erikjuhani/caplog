@@ -77,7 +77,7 @@ tags: example, caplog
 
 #### Tagging
 
-Logs can be tagged by either writing it in the log entry or using caplog `-t` or `--tag` flag.
+Logs can be tagged by either writing it in the log entry or using caplog `-t` flag.
 
 Logs can be tagged with one or multiple tags at once, these tags will be added to the end of the log entry.
 
@@ -91,7 +91,7 @@ caplog "New entry with tags - comma separation" -t tag0,tag1
 
 Logs can be grouped under sub-directories or what I like to call _pages_.
 
-To write log entry under a page you need to provide a `--page` flag with the name of the sub-directory.
+To write log entry under a page you need to provide a `-p` flag with the name of the sub-directory.
 
 ```bash
 caplog "New entry in to different page" -p subpage
@@ -132,22 +132,22 @@ grep --exclude-dir=.git -lrF <keyword> ~/.caplog/capbook | xargs cat
 With directory flag using bash
 
 ```bash
-grep --exclude-dir=.git -lrF <keyword> $(caplog --get-dir) | xargs cat
+grep --exclude-dir=.git -lrF <keyword> $(caplog -g) | xargs cat
 ```
 
 ## TODO (in priority order):
 
 - [x] If repository is remote tracked handle automatic rebase and push
 
-- [x] Implement `-t|--tag` for adding tags to a log entry
+- [x] Implement `-t` for adding tags to a log entry
 
-- [x] Implement `-g|--get-dir` return capbook directory for easier use of find operations
+- [x] Implement `-g` return capbook directory for easier use of find operations
 
-- [x] Implement `-p|--page` to separate log entries into pages by default uses root `capbook/<page>`
+- [x] Implement `-p` to separate log entries into pages by default uses root `capbook/<page>`
 
-- [x] Implement `-c|--config` to change configuration values `git.local_repository=~/mylogs`
+- [x] Implement `-c` to change configuration values `git.local_repository=~/mylogs`
 
-- [ ] Implement `-d|--dry-run` run the command dry, no filesystem or git changes
+- [ ] Implement `-d` run the command dry, no filesystem or git changes
 
 - [ ] Use github actions to create separate binaries for different system architectures
 
