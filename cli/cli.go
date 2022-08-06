@@ -1,39 +1,62 @@
 package cli
 
 import (
-	"flag"
 	"fmt"
 	"strings"
 	"time"
 
 	"github.com/erikjuhani/caplog/config"
 	"github.com/erikjuhani/caplog/core"
+	"github.com/erikjuhani/caplog/flag"
 )
 
 var (
-	setConfig = flag.Bool("c", false, "Change config setting with key and value")
-	getDir    = flag.Bool("g", false, "Returns the local repository directory")
-	page      = flag.String("p", "", "Save log entry to sub-directory (=page)")
-	tags      = flagCustom("t", &StringsFlag{}, "Add tags to log entry")
+	getDir    = flag.Val("getdir", "g", false, "Returns the local repository directory")
+	page      = flag.Val("page", "p", "", "Saves log entry to <sub-directory>/<page>")
+	tags      = flag.Val("tag", "t", TagsFlag{}, "Adds `<tag>` to log entry")
+	setConfig = flag.Val("config", "c", ConfigFlag{}, "Changes config setting with `<key=value>`")
 )
 
-type StringsFlag []string
+type TagsFlag []string
 
-func (s *StringsFlag) String() string {
+func (s *TagsFlag) String() string {
 	return fmt.Sprintf("%s", *s)
 }
 
-func (s *StringsFlag) Set(value string) error {
+func (s *TagsFlag) Set(value string) error {
 	*s = append(*s, value)
 	return nil
 }
 
-func flagCustom[T flag.Value](name string, value T, usage string) T {
-	flag.Var(value, name, usage)
-	return value
+type ConfigFlag map[string]string
+
+func (c *ConfigFlag) String() string {
+	return fmt.Sprintf("%s", *c)
+}
+
+func (c *ConfigFlag) Set(value string) error {
+	pair := strings.Split(value, "=")
+
+	k := pair[0]
+
+	// Check that passed configuration keys are valid
+	if ok := config.Contains(k); !ok {
+		return fmt.Errorf("%s is not a valid configuration key", k)
+	}
+
+	if len(pair) < 2 {
+		return fmt.Errorf("key needs a value (ex. %s=<value>)", k)
+	}
+
+	v := pair[1]
+
+	(*c)[k] = v
+
+	return nil
 }
 
 func Run() error {
+	flag.Usage("caplog")
 	flag.Parse()
 
 	if *getDir {
@@ -42,8 +65,9 @@ func Run() error {
 		return nil
 	}
 
-	if *setConfig {
-		return setConfigValue(flag.Args())
+	// Config flags were used needs to do configuration change
+	if len(*setConfig) > 0 {
+		return setConfigValue()
 	}
 
 	return writeLog()
@@ -74,7 +98,7 @@ func writeLog() error {
 
 }
 
-func setConfigValue(args []string) error {
+func oldSetConfigValue(args []string) error {
 	argAmount := len(args)
 
 	if argAmount == 0 {
@@ -96,4 +120,8 @@ func setConfigValue(args []string) error {
 	}
 
 	return config.Write(m)
+}
+
+func setConfigValue() error {
+	return config.Write(*setConfig)
 }

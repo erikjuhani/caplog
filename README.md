@@ -103,13 +103,13 @@ Configuration can either be adjusted by manually writing to the caplog config fi
 using config flag option to provide configuration changes through cli.
 
 ```bash
-caplog -c git.local_repository ~/mybook
+caplog -c git.local_repository=~/mybook
 ```
 
 User can also provide multiple configuration values at once.
 
 ```bash
-caplog -c git.local_repository ~/mybook editor vim
+caplog -c git.local_repository=~/mybook -c editor=vim
 ```
 
 ### Log storage

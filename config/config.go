@@ -30,15 +30,9 @@ type config struct {
 }
 
 func Contains(key ConfigKey) bool {
-	keys := []ConfigKey{GitLocalRepositoryKey, EditorKey}
-
-	for _, k := range keys {
-		if k == key {
-			return true
-		}
-	}
-
-	return false
+	keys := map[ConfigKey]struct{}{GitLocalRepositoryKey: {}, EditorKey: {}}
+	_, exists := keys[key]
+	return exists
 }
 
 func Write(c map[ConfigKey]string) error {
@@ -111,4 +105,29 @@ func Load() error {
 	}
 
 	return err
+}
+
+// Viable config paths
+// .config/caplog.toml
+// ~/.caplog.toml
+
+// Reading config toml
+// 1. initialize default configuration values
+// 2. search for existing config file
+// 3. if found use replace default values with existing user configurations
+// 4. unmarshal to config struct from toml
+
+// Writing config toml
+// 1. check that the key is a correct configuration key
+// 2. check if configuration or existing configuration already exists
+// 3. read to struct
+// 4. write filled keys to configuration file
+
+// TODO: Add package github.com/adrg/xdg for better configuration support
+
+type C struct {
+	Git struct {
+		LocalRepository string
+	}
+	Editor string
 }
