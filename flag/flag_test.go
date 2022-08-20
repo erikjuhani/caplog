@@ -1,6 +1,7 @@
 package flag
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"testing"
@@ -361,6 +362,88 @@ func TestArgs(t *testing.T) {
 
 			if len(tt.expected) != len(actual) {
 				t.Fatalf("flag value did not match expected %q, got %q", tt.expected, actual)
+			}
+		})
+	}
+}
+
+func TestUsage(t *testing.T) {
+	tests := []struct {
+		flags    []Flag
+		expected string
+	}{
+		{
+			flags:    []Flag{},
+			expected: "usage: test\n",
+		},
+		{
+			flags: []Flag{
+				{},
+			},
+			expected: "usage: test\n",
+		},
+		{
+			flags: []Flag{
+				{},
+				{
+					Longhand:  "test",
+					Shorthand: "t",
+					Usage:     "Usage for test",
+				},
+			},
+			expected: "usage: test [-t --test]\n    -t --test       Usage for test\n",
+		},
+		{
+			flags: []Flag{
+				{
+					Longhand:  "aa",
+					Shorthand: "a",
+					Usage:     "Usage for a",
+				},
+				{
+					Longhand:  "bb",
+					Shorthand: "b",
+					Usage:     "Usage for b",
+				},
+				{
+					Longhand:  "cc",
+					Shorthand: "c",
+					Usage:     "Usage for c",
+				},
+				{
+					Longhand:  "dd",
+					Shorthand: "d",
+					Usage:     "Usage for d",
+				},
+				{
+					Longhand:  "ee",
+					Shorthand: "e",
+					Usage:     "Usage for e",
+				},
+			},
+			expected: `usage: test [-a --aa] [-b --bb] [-c --cc] [-d --dd]
+            [-e --ee]
+    -a --aa         Usage for a
+    -b --bb         Usage for b
+    -c --cc         Usage for c
+    -d --dd         Usage for d
+    -e --ee         Usage for e
+`,
+		},
+	}
+
+	for _, tt := range tests {
+		var b bytes.Buffer
+		fs := newFlagSet[any]("", flag.ContinueOnError)
+		fs.SetOutput(&b)
+		fs.flags = tt.flags
+
+		t.Run("", func(t *testing.T) {
+			usageFn(fs, "test")()
+			actual := b.String()
+
+			if tt.expected != actual {
+				t.Fatalf("Help string did not match expected %q, got %q", tt.expected, actual)
 			}
 		})
 	}

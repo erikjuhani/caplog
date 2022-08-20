@@ -9,7 +9,7 @@ import (
 )
 
 type Flag struct {
-	LongHand  string
+	Longhand  string
 	Shorthand string
 	Usage     string
 }
@@ -51,7 +51,7 @@ func Args() []string {
 }
 
 func Usage(name string) {
-	commandLine.Usage = usageFn(name)
+	commandLine.Usage = usageFn(commandLine, name)
 }
 
 func Parse() error {
@@ -88,56 +88,62 @@ func Val[T any](name string, shorthand string, value T, usage string) *T {
 	return val(commandLine, name, shorthand, value, usage)
 }
 
-func usageFn(name string) func() {
-	return func() {
-		// TODO: better version of this
-		var _ strings.Builder
+func usageFn(fs *FlagSet[any], name string) func() {
+	var s, u strings.Builder
 
-		summary := fmt.Sprintf("usage: %s", name)
+	s.WriteString("usage: " + name)
 
-		var flagUsage string
+	p := s.Len()
 
-		for _, f := range commandLine.flags {
-			var compound string
+	// append help flag?
+	for i, f := range fs.flags {
+		var c strings.Builder
 
-			if f.Shorthand != "" {
-				compound = fmt.Sprintf("-%s", f.Shorthand)
-			}
-			if f.LongHand != "" {
-				compound = fmt.Sprintf("%s|--%s", compound, f.LongHand)
-			}
-
-			summary = fmt.Sprintf("%s [%s]", summary, compound)
-
-			flagUsage = fmt.Sprintf("%s  %s\t%s\n", flagUsage, compound, f.Usage)
+		if f.Shorthand == "" && f.Longhand == "" {
+			continue
 		}
 
-		fmt.Println(summary)
-		fmt.Print(flagUsage)
+		if f.Shorthand != "" {
+			fmt.Fprintf(&c, "-%s", f.Shorthand)
+		}
+
+		if f.Longhand != "" {
+			if f.Shorthand != "" {
+				c.WriteRune(' ')
+			}
+			fmt.Fprintf(&c, "--%s", f.Longhand)
+		}
+
+		compound := c.String()
+
+		fmt.Fprintf(&s, " [%s]", compound)
+
+		if (i+1)%4 == 0 {
+			fmt.Fprintf(&s, "\n%*s", p, "")
+		}
+
+		fmt.Fprintf(
+			&u,
+			"%*s%*s\n",
+			len(compound)+4,
+			compound,
+			len(f.Usage)-len(compound)+16,
+			f.Usage,
+		)
+	}
+
+	return func() {
+		fmt.Fprint(fs.Output(), s.String(), "\n", u.String())
 	}
 }
 
 func setFlagUsage(flags *[]Flag, name string, shorthand string, usage string) {
-	// TODO: better version of this
-	var _ strings.Builder
-
-	var f Flag
-
 	if len(name) == 1 {
 		shorthand = name
+		name = ""
 	}
 
-	if shorthand != "" {
-		f.Shorthand = shorthand
-	}
-
-	if len(name) > 1 {
-		f.LongHand = name
-	}
-
-	f.Usage = usage
-
-	*flags = append(*flags, f)
+	*flags = append(*flags, Flag{Longhand: name, Shorthand: shorthand, Usage: usage})
 }
 
 func boolVar(fs *FlagSet[any], name string, shorthand string, value bool, usage string) interface{} {
