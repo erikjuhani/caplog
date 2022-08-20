@@ -321,3 +321,47 @@ func TestValCustom(t *testing.T) {
 		})
 	}
 }
+
+func TestArgs(t *testing.T) {
+	tests := []struct {
+		args     []string
+		expected []string
+	}{
+		{
+			args:     []string{},
+			expected: []string{},
+		},
+		{
+			args:     []string{"-s", "string"},
+			expected: []string{},
+		},
+		{
+			args:     []string{"--bool", "arg0"},
+			expected: []string{"arg0"},
+		},
+		{
+			args:     []string{"arg0", "--bool", "arg1", "-s", "string", "arg2"},
+			expected: []string{"arg0", "arg1", "arg2"},
+		},
+	}
+
+	for _, tt := range tests {
+		fs := newFlagSet[any]("", flag.ContinueOnError)
+		t.Run("", func(t *testing.T) {
+			// setup flags
+			// boolean is a special case so that needs to be tested
+			val(fs, "bool", "b", false, "bool flag")
+			val(fs, "string", "s", "", "string flag")
+
+			if err := fs.Parse(tt.args); err != nil {
+				t.Fatal(err)
+			}
+
+			actual := args(fs)
+
+			if len(tt.expected) != len(actual) {
+				t.Fatalf("flag value did not match expected %q, got %q", tt.expected, actual)
+			}
+		})
+	}
+}

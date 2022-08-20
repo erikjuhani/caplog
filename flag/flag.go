@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"reflect"
 	"strings"
 )
 
@@ -24,16 +25,37 @@ func newFlagSet[T any](name string, errorHandling flag.ErrorHandling) *FlagSet[T
 	return &FlagSet[T]{flag.NewFlagSet(name, errorHandling), []Flag{}}
 }
 
+func args(fs *FlagSet[any]) []string {
+	args := fs.Args()
+
+	pArgs := []string{}
+	for i, arg := range args {
+		if arg[0] == '-' {
+			continue
+		}
+		if i > 0 && args[i-1][0] == '-' {
+			f := fs.Lookup(strings.ReplaceAll(args[i-1], "-", ""))
+
+			if f != nil && reflect.TypeOf(f.Value).Elem().Kind() != reflect.Bool {
+				continue
+			}
+		}
+		pArgs = append(pArgs, arg)
+	}
+
+	return pArgs
+}
+
 func Args() []string {
-	return commandLine.Args()
+	return args(commandLine)
 }
 
 func Usage(name string) {
 	commandLine.Usage = usageFn(name)
 }
 
-func Parse() {
-	commandLine.Parse(os.Args[1:])
+func Parse() error {
+	return commandLine.Parse(os.Args[1:])
 }
 
 func val[T any](fs *FlagSet[any], name string, shorthand string, value T, usage string) *T {

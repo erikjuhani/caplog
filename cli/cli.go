@@ -98,30 +98,6 @@ func writeLog() error {
 
 }
 
-func oldSetConfigValue(args []string) error {
-	argAmount := len(args)
-
-	if argAmount == 0 {
-		return fmt.Errorf("expected 2 arguments, got %d", argAmount)
-	}
-
-	if argAmount%2 > 0 {
-		return fmt.Errorf("expected %d arguments, got %d", argAmount+1, argAmount)
-	}
-
-	m := make(map[config.ConfigKey]string)
-
-	for i := 0; i < argAmount; i += 2 {
-		key := args[i]
-		if ok := config.Contains(key); !ok {
-			return fmt.Errorf("%s is not a valid configuration key", key)
-		}
-		m[key] = args[i+1]
-	}
-
-	return config.Write(m)
-}
-
 func setConfigValue() error {
 	return config.Write(*setConfig)
 }
