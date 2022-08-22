@@ -5,13 +5,15 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"regexp"
 	"strings"
 )
 
 type Flag struct {
-	Longhand  string
-	Shorthand string
-	Usage     string
+	Longhand   string
+	Shorthand  string
+	UsageValue string
+	Usage      string
 }
 
 type FlagSet[T any] struct {
@@ -116,7 +118,11 @@ func usageFn(fs *FlagSet[any], name string) func() {
 
 		compound := c.String()
 
-		fmt.Fprintf(&s, " [%s]", compound)
+		if f.UsageValue != "" {
+			fmt.Fprintf(&s, " [%s=%s]", compound, f.UsageValue)
+		} else {
+			fmt.Fprintf(&s, " [%s]", compound)
+		}
 
 		if (i+1)%4 == 0 {
 			fmt.Fprintf(&s, "\n%*s", p, "")
@@ -143,10 +149,17 @@ func setFlagUsage(flags *[]Flag, name string, shorthand string, usage string) {
 		name = ""
 	}
 
-	*flags = append(*flags, Flag{Longhand: name, Shorthand: shorthand, Usage: usage})
+	// Parse usage value from the usage text. Looks for the first occurrance between ``
+	re := regexp.MustCompile("`.*`")
+	val := strings.ReplaceAll(re.FindString(usage), "`", "")
+
+	*flags = append(
+		*flags,
+		Flag{Longhand: name, Shorthand: shorthand, Usage: usage, UsageValue: val},
+	)
 }
 
-func boolVar(fs *FlagSet[any], name string, shorthand string, value bool, usage string) interface{} {
+func boolVar(fs *FlagSet[any], name string, shorthand string, value bool, usage string) *bool {
 	fs.BoolVar(&value, name, value, usage)
 	if shorthand != "" {
 		fs.BoolVar(&value, shorthand, value, usage)

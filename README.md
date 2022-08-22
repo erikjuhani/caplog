@@ -2,16 +2,16 @@
 
 Simple logging system for code maneuvering captains.
 
-!!! Caplog is in a prototype stage !!!
+**⚠️Caplog is in a prototype stage⚠️**
 
 ## Prerequisites
 
 * [Git](https://git-scm.com/)
-* [The Go Programming Language](https://go.dev/dl/)
+* [The Go Programming Language](https://go.dev/dl/) (version `1.18` or higher is required)
 
 ## Installation
 
-Installation can be done by simply using `go install`.
+Installation can be done simply by using `go install`.
 
 ```bash
 go install github.com/erikjuhani/caplog@latest
@@ -134,32 +134,3 @@ With directory flag using bash
 ```bash
 grep --exclude-dir=.git -lrF <keyword> $(caplog -g) | xargs cat
 ```
-
-## TODO (in priority order):
-
-- [x] If repository is remote tracked handle automatic rebase and push
-
-- [x] Implement `-t` for adding tags to a log entry
-
-- [x] Implement `-g` return capbook directory for easier use of find operations
-
-- [x] Implement `-p` to separate log entries into pages by default uses root `capbook/<page>`
-
-- [x] Implement `-c` to change configuration values `git.local_repository=~/mylogs`
-
-- [ ] Implement `-d` run the command dry, no filesystem or git changes
-
-- [ ] Use github actions to create separate binaries for different system architectures
-
-- [ ] Add brew formula for easier install with homebrew
-
-- [ ] Add more installation methods to README `wget` and `brew`
-
-- [ ] Add charmbracelet TUI library to create better loading experience
-
-- [ ] Maybe using git as a detached process if experience is really slow?
-
-- [ ] Maybe use libgit2 instead of calling `git` executable?
-
-- [ ] Log file encryption -> commit message obfuscated
-
