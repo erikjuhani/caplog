@@ -2,7 +2,6 @@ package core
 
 import (
 	"bufio"
-	"crypto/sha1"
 	"errors"
 	"fmt"
 	"os"
@@ -56,7 +55,7 @@ const (
 	// WEEKDAY, MONTH DAY, YEAR
 	metaTimeLayout = "Monday, January 2, 2006"
 	timeFormat     = "15:04"
-	timeFileFormat = "2006-01-02T15:04:05"
+	timeFileFormat = "02-01-2006"
 )
 
 func NewLog(meta Meta, data string, tags []string) Log {
@@ -88,11 +87,24 @@ func WriteLog(log Log) error {
 		}
 	}
 
-	filename := generateFilename(log)
+	filename := logFilename(log)
 	filepath := fmt.Sprintf("%s/%s", loc, filename)
+
+	f, err := os.OpenFile(filepath, os.O_APPEND|os.O_WRONLY, 0644)
+	if err == nil {
+		defer f.Close()
+	}
+
 	formattedLog := formatLog(log)
 
-	if err := os.WriteFile(filepath, []byte(formattedLog), 0644); err != nil {
+	if _, ok := err.(*os.PathError); ok {
+		if err := os.WriteFile(filepath, []byte(fmt.Sprintf("%s\n%s", log.Meta.String(), formattedLog)), 0644); err != nil {
+			return err
+		}
+		return git.CommitSingleFile(filepath, formattedLog)
+	}
+
+	if _, err := f.WriteString("\n" + formattedLog); err != nil {
 		return err
 	}
 
@@ -135,6 +147,15 @@ func CaptureEditorInput() ([]byte, error) {
 	return os.ReadFile(filename)
 }
 
+// NOTE: Mutates the given slice values with the prefix
+func addPrefix(prefix string, s []string) []string {
+	for i, v := range s {
+		s[i] = prefix + v
+	}
+
+	return s
+}
+
 func formatLog(log Log) string {
 	if len(log.Data) == 0 {
 		return ""
@@ -142,17 +163,17 @@ func formatLog(log Log) string {
 
 	ts := log.Date.Format(timeFormat)
 	if len(log.Data) == 1 {
-		return fmt.Sprintf("%s\n%s\t%s\n", log.Meta, ts, log.Data[0])
+		return fmt.Sprintf("%s\t%s\n", ts, log.Data[0])
 	}
-	return fmt.Sprintf("%s\n%s\t%s\n%s\n", log.Meta, ts, log.Data[0], strings.Join(log.Data[1:], "\n"))
+
+	return fmt.Sprintf(
+		"%s\t%s\n%s\n",
+		ts,
+		log.Data[0],
+		strings.Join(addPrefix("	", log.Data[1:]), "\n"),
+	)
 }
 
-func generateFilename(log Log) string {
-	h := sha1.New()
-	h.Write([]byte(log.Date.String()))
-
-	hash := fmt.Sprintf("%x", h.Sum(nil))[0:7]
-	date := log.Date.Format(timeFileFormat)
-
-	return fmt.Sprintf("%s_%s.log", date, hash)
+func logFilename(log Log) string {
+	return fmt.Sprintf("%s.log.md", log.Date.Format(timeFileFormat))
 }

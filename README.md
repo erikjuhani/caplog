@@ -42,7 +42,7 @@ caplog "Some entry text"
 ## Log history
 
 Logs are created by default under `$HOME/.caplog/capbook`, which is initialized as a git repository.
-The logs are written directly to main branch following `<timestamp>_<hash>.log` pattern.
+The logs are written directly to main branch following `<day>-<month>-<year>.log.md` pattern.
 After file is created it will automatically be committed to the `.caplog/capbook` repository.
 
 The default location can be changed to any preferred location. It can also be an existing git repository.
@@ -59,20 +59,22 @@ NOTE: if using existing git repository, currently the logs will always be added 
 Created logs are in human readable text format.
 The writer has all the freedom of composing the message.
 
+The logs can be easily read with markdown viewers like `glow`.
+
 ```log
-// 2022-05-16T19:20:17_49b13c5.log
+// 16-05-2022.log.md
 ---
 date: Monday, May 16, 2022
 ---
 
 19:20	Hello this is my first log entry!
 
-Used as an example to provide some idea of the log entry.
+	Used as an example to provide some idea of the log entry.
 
-You can write anything here and even use keywords or tags
-to provide easier content seeking capabilities.
+	You can write anything here and even use keywords or tags
+	to provide easier content seeking capabilities.
 
-tags: example, caplog
+	tags: example, caplog
 ```
 
 #### Tagging
