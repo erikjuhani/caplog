@@ -55,12 +55,7 @@ func TestFormatLog(t *testing.T) {
 		},
 		{
 			log: Log{Meta: Meta{Date: testDate}, Data: []string{"New log entry"}},
-			expected: `---
-date: Saturday, May 14, 2022
----
-
-22:34	New log entry
-`,
+			expected: "22:34	New log entry\n",
 		},
 		{
 			log: Log{Meta: Meta{Date: testDate, Page: "test"}, Data: []string{
@@ -68,15 +63,9 @@ date: Saturday, May 14, 2022
 				"Content",
 				"Multiple lines."},
 			},
-			expected: `---
-date: Saturday, May 14, 2022
-
-page: test
----
-
-22:34	New log entry
-Content
-Multiple lines.
+			expected: `22:34	New log entry
+	Content
+	Multiple lines.
 `,
 		},
 	}
@@ -91,7 +80,7 @@ Multiple lines.
 	}
 }
 
-func TestGenerateFilename(t *testing.T) {
+func TestLogFilename(t *testing.T) {
 	testDate := time.Date(2022, 5, 14, 22, 34, 16, 0, time.UTC)
 
 	tests := []struct {
@@ -100,18 +89,19 @@ func TestGenerateFilename(t *testing.T) {
 	}{
 		{
 			log:      Log{},
-			expected: "0001-01-01T00:00:00_95c7e5c.log",
+			expected: "01-01-0001.log.md",
 		},
 		{
 			log:      Log{Meta: Meta{Date: testDate}},
-			expected: "2022-05-14T22:34:16_1ee35ca.log",
+			expected: "14-05-2022.log.md",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			if tt.expected != generateFilename(tt.log) {
-				t.Fatal("expected filename did not match actual filename generated")
+			actual := logFilename(tt.log)
+			if tt.expected != actual {
+				t.Fatalf("expected filename \"%s\" did not match actual filename \"%s\"", tt.expected, actual)
 			}
 		})
 	}
