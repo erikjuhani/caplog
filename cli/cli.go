@@ -39,11 +39,6 @@ func (c *ConfigFlag) Set(value string) error {
 
 	k := pair[0]
 
-	// Check that passed configuration keys are valid
-	if ok := config.Contains(k); !ok {
-		return fmt.Errorf("%s is not a valid configuration key", k)
-	}
-
 	if len(pair) < 2 {
 		return fmt.Errorf("key needs a value (ex. %s=<value>)", k)
 	}
@@ -67,7 +62,7 @@ func Run() error {
 
 	// Config flags were used needs to do configuration change
 	if len(*setConfig) > 0 {
-		return setConfigValue()
+		return config.Write(*setConfig)
 	}
 
 	return writeLog()
@@ -96,8 +91,4 @@ func writeLog() error {
 
 	return core.WriteLog(core.NewLog(meta, strings.Join(args, "\n"), *tags))
 
-}
-
-func setConfigValue() error {
-	return config.Write(*setConfig)
 }
