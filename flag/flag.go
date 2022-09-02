@@ -32,6 +32,11 @@ func args(fs *FlagSet[any]) []string {
 
 	pArgs := []string{}
 	for i, arg := range args {
+		if arg == "" {
+			pArgs = append(pArgs, arg)
+			continue
+		}
+
 		if arg[0] == '-' {
 			continue
 		}

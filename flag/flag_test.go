@@ -333,6 +333,10 @@ func TestArgs(t *testing.T) {
 			expected: []string{},
 		},
 		{
+			args:     []string{""},
+			expected: []string{""},
+		},
+		{
 			args:     []string{"-s", "string"},
 			expected: []string{},
 		},
@@ -386,12 +390,13 @@ func TestUsage(t *testing.T) {
 			flags: []Flag{
 				{},
 				{
-					Longhand:  "test",
-					Shorthand: "t",
-					Usage:     "Usage for test",
+					Longhand:   "test",
+					Shorthand:  "t",
+					Usage:      "Usage for `<test>`",
+					UsageValue: "<test>",
 				},
 			},
-			expected: "usage: test [-t --test]\n    -t --test       Usage for test\n",
+			expected: "usage: test [-t --test=<test>]\n    -t --test       Usage for `<test>`\n",
 		},
 		{
 			flags: []Flag{
@@ -444,6 +449,41 @@ func TestUsage(t *testing.T) {
 
 			if tt.expected != actual {
 				t.Fatalf("Help string did not match expected %q, got %q", tt.expected, actual)
+			}
+		})
+	}
+}
+
+func TestSetFlagUsage(t *testing.T) {
+	tests := []struct {
+		name      string
+		shorthand string
+		usage     string
+		actual    []Flag
+		expected  Flag
+	}{
+		{},
+		{
+			name:      "test",
+			shorthand: "t",
+			usage:     "Adjust with `bool` value",
+			expected: Flag{
+				Longhand:   "test",
+				Shorthand:  "t",
+				Usage:      "Adjust with `bool` value",
+				UsageValue: "bool",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run("", func(t *testing.T) {
+			setFlagUsage(&tt.actual, tt.name, tt.shorthand, tt.usage)
+
+			actual := tt.actual[0]
+
+			if tt.expected != actual {
+				t.Fatalf("flag usage did not match expected %q, got %q", tt.expected, actual)
 			}
 		})
 	}
