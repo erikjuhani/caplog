@@ -120,7 +120,7 @@ func setDefaults(rpath string, c *config) {
 
 func writeTo(configPath string, c map[ConfigKey]string) error {
 	var localConfig config
-	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+	if _, err := os.Stat(configPath); !os.IsNotExist(err) {
 		if err := toml.Unmarshal(configFile, &localConfig); err != nil {
 			return err
 		}
