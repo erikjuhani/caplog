@@ -105,13 +105,64 @@ Configuration can either be adjusted by manually writing to the caplog config fi
 using config flag option to provide configuration changes through cli.
 
 ```bash
-caplog -c git.local_repository=~/mybook
+caplog -c editor=vim
 ```
 
 User can also provide multiple configuration values at once.
 
 ```bash
-caplog -c git.local_repository=~/mybook -c editor=vim
+caplog -c workspaces=mybook:~/mybook -c editor=vim
+```
+
+### Workspaces
+
+Logs can be stored in multiple git repositories by changing the workspace.
+Available workspaces should be added to the cofiguration file with correct paths.
+
+By default the logs will be stored in `"~/.caplog/capbook"`
+
+Default workspace is always available and can always be set. Default workspace
+cannot be overridden.
+
+#### Adding workspaces
+
+Workspaces can be added by either editing `caplog.toml` configuration file or
+by providing a comma separated list of values to config flag.
+
+Using config flag:
+
+```bash
+caplog -c workspaces=mybook:~/mybook,project:~/project
+```
+
+Or add definition directly to config file:
+
+```toml
+workspaces = [{name = 'mybook', path = '~/mybook'}, {name = 'project', path = '~/project'}]
+```
+
+#### Changing current workspace
+
+Workspace can be changed with three ways. Either by changing the
+`current_workspace` config value itself, by using `--workspace` flag or by
+writing the current workspace directly to config file.
+
+Changing current workspace using config flag:
+
+```bash
+caplog -c current_workspace=mybook
+```
+
+Changing current workspace using workspace flag:
+
+```bash
+caplog -w mybook
+```
+
+Writing directly to config file:
+
+```toml
+current_workspace = 'mybook'
 ```
 
 ### Log storage

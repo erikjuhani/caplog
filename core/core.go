@@ -19,7 +19,7 @@ type Meta struct {
 }
 
 func (m Meta) Location() string {
-	loc := config.Config.Git.LocalRepository
+	loc := config.WorkspacePath()
 
 	if len(m.Page) == 0 {
 		return loc
