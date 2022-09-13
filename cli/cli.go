@@ -11,8 +11,9 @@ import (
 )
 
 var (
-	getDir    = flag.Val("getdir", "g", false, "Returns the local repository directory")
+	dir       = flag.Val("getdir", "g", false, "Returns the local repository directory")
 	page      = flag.Val("page", "p", "", "Saves log entry to <sub-directory>/<page>")
+	workspace = flag.Val("workspace", "w", "", "Changes workspace to given <workspace> if it exists")
 	tags      = flag.Val("tag", "t", TagsFlag{}, "Adds `<tag>` to log entry")
 	setConfig = flag.Val("config", "c", ConfigFlag{}, "Changes config setting with `<key=value>`")
 )
@@ -54,10 +55,19 @@ func Run() error {
 	flag.Usage("caplog")
 	flag.Parse()
 
-	if *getDir {
+	if *dir {
 		// Return current repository path
-		fmt.Println(config.Config.Git.LocalRepository)
+		fmt.Println(config.Config.CurrentWorkspace)
 		return nil
+	}
+
+	if *workspace != "" {
+		fmt.Printf("%+v", config.Config.Workspaces)
+		if exists := config.Config.Workspaces.Has(*workspace); !exists {
+			return fmt.Errorf("given \"%s\" workspace is not a valid workspace\nvalid workspaces are: %v", *workspace, config.Config.Workspaces.Names())
+		}
+
+		return config.Write(map[string]string{config.CurrentWorkspaceKey: *workspace})
 	}
 
 	// Config flags were used needs to do configuration change
