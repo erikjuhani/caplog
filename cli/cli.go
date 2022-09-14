@@ -62,7 +62,6 @@ func Run() error {
 	}
 
 	if *workspace != "" {
-		fmt.Printf("%+v", config.Config.Workspaces)
 		if exists := config.Config.Workspaces.Has(*workspace); !exists {
 			return fmt.Errorf("given \"%s\" workspace is not a valid workspace\nvalid workspaces are: %v", *workspace, config.Config.Workspaces.Names())
 		}
