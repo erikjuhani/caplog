@@ -3,21 +3,20 @@ package cli
 import (
 	"fmt"
 	"io"
-	"os"
 	"strings"
 	"time"
 
 	"github.com/erikjuhani/caplog/config"
 	"github.com/erikjuhani/caplog/core"
-	"github.com/erikjuhani/caplog/flag"
+	"github.com/erikjuhani/miniflag"
 )
 
 var (
-	dir       = flag.Val("getdir", "g", false, "Returns the local repository directory")
-	page      = flag.Val("page", "p", "", "Saves log entry to <sub-directory>/<page>")
-	workspace = flag.Val("workspace", "w", "", "Changes workspace to given <workspace> if it exists")
-	tags      = flag.Val("tag", "t", TagsFlag{}, "Adds `<tag>` to log entry")
-	setConfig = flag.Val("config", "c", ConfigFlag{}, "Changes config setting with `<key=value>`")
+	dir       = miniflag.Flag("getdir", "g", false, "Returns the local repository directory")
+	page      = miniflag.Flag("page", "p", "", "Saves log entry to <sub-directory>/<page>")
+	workspace = miniflag.Flag("workspace", "w", "", "Changes workspace to given <workspace> if it exists")
+	tags      = miniflag.Flag("tag", "t", TagsFlag{}, "Adds `<tag>` to log entry")
+	setConfig = miniflag.Flag("config", "c", ConfigFlag{}, "Changes config setting with `<key=value>`")
 )
 
 var (
@@ -60,10 +59,8 @@ func (c *ConfigFlag) Set(value string) error {
 }
 
 func Run() error {
-	// TODO: use commandline output from flagset
-	out := os.Stdout
-	flag.Usage("caplog")
-	flag.Parse()
+	out := miniflag.CommandLine.Output()
+	miniflag.Parse()
 
 	if *dir {
 		// Return current repository path
@@ -101,7 +98,7 @@ func Run() error {
 }
 
 func writeLog(out io.Writer) error {
-	args := flag.Args()
+	args := miniflag.Args()
 	argN := len(args)
 
 	if argN > 1 {
