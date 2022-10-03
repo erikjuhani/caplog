@@ -2,6 +2,8 @@ package cli
 
 import (
 	"fmt"
+	"io"
+	"os"
 	"strings"
 	"time"
 
@@ -16,6 +18,12 @@ var (
 	workspace = flag.Val("workspace", "w", "", "Changes workspace to given <workspace> if it exists")
 	tags      = flag.Val("tag", "t", TagsFlag{}, "Adds `<tag>` to log entry")
 	setConfig = flag.Val("config", "c", ConfigFlag{}, "Changes config setting with `<key=value>`")
+)
+
+var (
+	ErrKeyNeedsValueF      = func(k string) error { return fmt.Errorf("key needs a value (ex. %s=<value>)", k) }
+	ErrExpectedOneArgument = func(n int) error { return fmt.Errorf("expected 1 argument, got %d", n) }
+	ErrWriteLog            = func(e error) error { return fmt.Errorf("failed to write log - %w", e) }
 )
 
 type TagsFlag []string
@@ -41,7 +49,7 @@ func (c *ConfigFlag) Set(value string) error {
 	k := pair[0]
 
 	if len(pair) < 2 {
-		return fmt.Errorf("key needs a value (ex. %s=<value>)", k)
+		return ErrKeyNeedsValueF(k)
 	}
 
 	v := pair[1]
@@ -52,52 +60,74 @@ func (c *ConfigFlag) Set(value string) error {
 }
 
 func Run() error {
+	// TODO: use commandline output from flagset
+	out := os.Stdout
 	flag.Usage("caplog")
 	flag.Parse()
 
 	if *dir {
 		// Return current repository path
-		fmt.Println(config.Config.CurrentWorkspace)
+		fmt.Fprintln(out, config.Config.CurrentWorkspace)
 		return nil
 	}
 
 	if *workspace != "" {
 		if exists := config.Config.Workspaces.Has(*workspace); !exists {
-			return fmt.Errorf("given \"%s\" workspace is not a valid workspace\nvalid workspaces are: %v", *workspace, config.Config.Workspaces.Names())
+			return config.ErrWorkspaceIsNotValid(*workspace, config.Config.Workspaces)
 		}
 
-		return config.Write(map[string]string{config.CurrentWorkspaceKey: *workspace})
+		if err := config.Write(map[string]string{config.CurrentWorkspaceKey: *workspace}); err != nil {
+			return err
+		}
+
+		fmt.Fprintf(out, "workspace changed to \"%s\"", *workspace)
+
+		return nil
 	}
 
 	// Config flags were used needs to do configuration change
 	if len(*setConfig) > 0 {
-		return config.Write(*setConfig)
+		if err := config.Write(*setConfig); err != nil {
+			return err
+		}
+
+		for k, v := range *setConfig {
+			fmt.Fprintf(out, "config \"%s\" set as \"%s\"\n", k, v)
+		}
+		return nil
 	}
 
-	return writeLog()
+	return writeLog(out)
 }
 
-func writeLog() error {
+func writeLog(out io.Writer) error {
 	args := flag.Args()
 	argN := len(args)
 
 	if argN > 1 {
-		return fmt.Errorf("expected 1 argument, got %d", argN)
+		return ErrWriteLog(ErrExpectedOneArgument(argN))
 	}
 
 	if argN == 0 {
 		input, err := core.CaptureEditorInput()
 		if err != nil {
-			return err
+			return ErrWriteLog(err)
 		}
 
 		meta := core.Meta{Date: time.Now(), Page: *page}
 
-		return core.WriteLog(core.NewLog(meta, string(input), *tags))
+		if err := core.WriteLog(out, core.NewLog(meta, string(input), *tags)); err != nil {
+			return ErrWriteLog(err)
+		}
+
+		return nil
 	}
 
 	meta := core.Meta{Date: time.Now(), Page: *page}
 
-	return core.WriteLog(core.NewLog(meta, strings.Join(args, "\n"), *tags))
+	if err := core.WriteLog(out, core.NewLog(meta, strings.Join(args, "\n"), *tags)); err != nil {
+		return ErrWriteLog(err)
+	}
 
+	return nil
 }

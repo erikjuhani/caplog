@@ -22,6 +22,14 @@ const (
 )
 
 var (
+	ErrWorkspaceIsNotValid = func(workspace string, validWorkspaces Workspaces) error {
+		return fmt.Errorf("given \"%s\" workspace is not a valid workspace\nvalid workspaces are: %v", workspace, validWorkspaces.Names())
+	}
+	ErrConfigKeyIsNotValid           = func(k string) error { return fmt.Errorf("\"%s\" is not a valid configuration key", k) }
+	ErrNotEnoughtArgsToSetWorkspaces = fmt.Errorf("not enough arguments to set workspaces, set the value with double colon separator \"workspace:path\"")
+)
+
+var (
 	// Users home directory
 	HomeDir string
 
@@ -151,7 +159,7 @@ func load(homeDir string, config *config) error {
 	config.Workspaces.Append("default", defaultPath)
 
 	if exists := config.Workspaces.Has(config.CurrentWorkspace); !exists {
-		return fmt.Errorf("given \"%s\" workspace is not a valid workspace\nvalid workspaces are: %v", config.CurrentWorkspace, config.Workspaces.Names())
+		return ErrWorkspaceIsNotValid(config.CurrentWorkspace, config.Workspaces)
 	}
 
 	return nil
@@ -173,7 +181,7 @@ func mergeMapToConfig(c map[string]string, config *config) error {
 			for _, raw := range wss {
 				rs := strings.SplitN(raw, ":", 2)
 				if len(rs) < 2 {
-					return fmt.Errorf("not enough arguments to set workspaces, set the value with double colon separator \"workspace:path\"")
+					return ErrNotEnoughtArgsToSetWorkspaces
 				}
 				ws = append(ws, Workspace{Name: rs[0], Path: rs[1]})
 			}
@@ -181,13 +189,13 @@ func mergeMapToConfig(c map[string]string, config *config) error {
 			config.Workspaces = ws
 		case CurrentWorkspaceKey:
 			if exists := config.Workspaces.Has(v); !exists && v != "default" {
-				return fmt.Errorf("given \"%s\" workspace is not a valid workspace\nvalid workspaces are: %v", v, config.Workspaces.Names())
+				return ErrWorkspaceIsNotValid(v, config.Workspaces)
 			}
 			config.CurrentWorkspace = v
 		case EditorKey:
 			config.Editor = v
 		default:
-			return fmt.Errorf("\"%s\" is not a valid configuration key", k)
+			return ErrConfigKeyIsNotValid(k)
 		}
 	}
 	return nil
