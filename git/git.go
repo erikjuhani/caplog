@@ -9,8 +9,9 @@ import (
 )
 
 var (
-	ErrNoPathProvided     = errors.New("no path provided")
-	ErrExecNotFoundInPath = errors.New("executable not found in path")
+	ErrNoPathProvided        = errors.New("no path provided")
+	ErrGitExecNotFoundInPath = errors.New("git executable not found in path")
+	ErrGitCommit             = func(e error) error { return fmt.Errorf("failed to commit - %w", e) }
 )
 
 func hasGitRemote() bool {
@@ -37,37 +38,37 @@ func isGitRepository(path string) bool {
 
 func CommitSingleFile(path string, msg string) error {
 	if len(path) == 0 {
-		return ErrNoPathProvided
+		return ErrGitCommit(ErrNoPathProvided)
 	}
 
 	dirpath := filepath.Dir(path)
 	if !isGitRepository(dirpath) {
 		if err := runGitCommand("init", "-q", "-b", "trunk", dirpath); err != nil {
-			return err
+			return ErrGitCommit(err)
 		}
 	}
 
 	if err := os.Chdir(dirpath); err != nil {
-		return err
+		return ErrGitCommit(err)
 	}
 
 	if err := runGitCommand("add", path); err != nil {
-		return err
+		return ErrGitCommit(err)
 	}
 
 	if err := runGitCommand("commit", "-m", msg, path); err != nil {
-		return err
+		return ErrGitCommit(err)
 	}
 
 	if hasGitRemote() {
 		// TODO: adjust with flag or configuration
 		// TODO: think about detached process ordering and composition
 		if err := runGitCommand("pull", "--rebase=merges"); err != nil {
-			return err
+			return ErrGitCommit(err)
 		}
 
 		if err := runDetachedGitCommand("push", "--force-with-lease"); err != nil {
-			return err
+			return ErrGitCommit(err)
 		}
 	}
 
@@ -84,7 +85,7 @@ func commandExists(command string) bool {
 
 func execCommand(cmd string, args ...string) (*exec.Cmd, error) {
 	if !commandExists(cmd) {
-		return nil, fmt.Errorf("%s %w", cmd, ErrExecNotFoundInPath)
+		return nil, fmt.Errorf("%s %w", cmd, ErrGitExecNotFoundInPath)
 	}
 
 	return exec.Command(cmd, args...), nil

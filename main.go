@@ -8,11 +8,13 @@ import (
 )
 
 func main() {
+	log.SetFlags(0)
+
 	if err := config.Load(); err != nil {
-		log.Fatal(err)
+		log.Fatalf("error: %s", err)
 	}
 
 	if err := cli.Run(); err != nil {
-		log.Fatal(err)
+		log.Fatalf("error: %s", err)
 	}
 }

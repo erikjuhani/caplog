@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"strings"
@@ -74,12 +75,12 @@ func NewLog(meta Meta, data string, tags []string) Log {
 	return l
 }
 
-func WriteLog(log Log) error {
-	if len(log.Data) == 0 {
+func WriteLog(out io.Writer, l Log) error {
+	if len(l.Data) == 0 {
 		return errors.New("no data provided")
 	}
 
-	loc := log.Location()
+	loc := l.Location()
 
 	if _, err := os.Stat(loc); os.IsNotExist(err) {
 		if err := os.MkdirAll(loc, os.ModePerm); err != nil {
@@ -87,7 +88,7 @@ func WriteLog(log Log) error {
 		}
 	}
 
-	filename := logFilename(log)
+	filename := logFilename(l)
 	filepath := fmt.Sprintf("%s/%s", loc, filename)
 
 	f, err := os.OpenFile(filepath, os.O_APPEND|os.O_WRONLY, 0644)
@@ -95,18 +96,24 @@ func WriteLog(log Log) error {
 		defer f.Close()
 	}
 
-	formattedLog := formatLog(log)
+	formattedLog := formatLog(l)
 
 	if _, ok := err.(*os.PathError); ok {
-		if err := os.WriteFile(filepath, []byte(fmt.Sprintf("%s\n%s", log.Meta.String(), formattedLog)), 0644); err != nil {
+		data := []byte(fmt.Sprintf("%s\n%s", l.Meta.String(), formattedLog))
+		if err := os.WriteFile(filepath, data, 0644); err != nil {
 			return err
 		}
+
+		fmt.Fprintf(out, "wrote (%db) to %s", len(data), filepath)
+
 		return git.CommitSingleFile(filepath, formattedLog)
 	}
 
 	if _, err := f.WriteString("\n" + formattedLog); err != nil {
 		return err
 	}
+
+	fmt.Fprintf(out, "wrote (%db) to %s", len("\n"+formattedLog), filepath)
 
 	return git.CommitSingleFile(filepath, formattedLog)
 }
